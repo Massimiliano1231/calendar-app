@@ -5,6 +5,10 @@ const mongoURI = process.env.MONGO_URI;
 
 const connectDB = async () => {
     try {
+        if (!mongoURI) {
+            throw new Error("Variabile ambiente MONGO_URI non configurata.");
+        }
+
         console.log("Inizio connessione a MongoDB...");
 
         await mongoose.connect(mongoURI, {

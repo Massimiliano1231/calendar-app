@@ -3,6 +3,17 @@
 
 ---
 
+## Configurazione Ambiente
+
+1. Copia `.env.example` in `.env`.
+2. Imposta almeno le variabili:
+   - `MONGO_URI`
+   - `JWT_SECRET`
+   - `SMTP_USER` e `SMTP_PASS` (se vuoi inviare email)
+3. Non committare mai file `.env` o credenziali reali nel codice.
+
+---
+
 ## Struttura del Progetto
 
 ### **1. Cartella Root**

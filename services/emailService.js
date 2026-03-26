@@ -2,17 +2,35 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config(); 
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'noreply@example.com',
-    pass: 'REDACTED_MAIL_APP_PASSWORD',
-  },
-});
+const SMTP_SERVICE = process.env.SMTP_SERVICE || 'gmail';
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASS = process.env.SMTP_PASS;
+const MAIL_FROM = process.env.MAIL_FROM || (SMTP_USER ? `"Servizio Sito SELFIE"<${SMTP_USER}>` : '"Servizio Sito SELFIE"<noreply@example.com>');
+
+const isEmailConfigured = Boolean(SMTP_USER && SMTP_PASS);
+
+const transporter = isEmailConfigured
+  ? nodemailer.createTransport({
+      service: SMTP_SERVICE,
+      auth: {
+        user: SMTP_USER,
+        pass: SMTP_PASS,
+      },
+    })
+  : null;
+
+if (!isEmailConfigured) {
+  console.warn('Email non configurata: imposta SMTP_USER e SMTP_PASS per abilitare l invio delle notifiche.');
+}
 
 
 
 const sendMail=(mailOptions)=>{
+  if (!transporter) {
+    console.warn('Trasporto email non configurato: invio saltato.');
+    return;
+  }
+
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.log('Errore nell invio email:', error);
@@ -32,7 +50,7 @@ const sendReminderEmail = (email, activities) => {
   });
 
   const mailOptions = {
-    from: '"Servizio Sito SELFIE"<noreply@example.com>',
+    from: MAIL_FROM,
     to: email,
     subject: 'Promemoria: Attività in scadenza tra 2gg',
     text: emailContent,
@@ -49,7 +67,7 @@ const sendNotifEmail = (recipientEmail, eventDetails) => {
   });
 
   const mailOptions = {
-    from: '"Servizio Sito SELFIE"<noreply@example.com>',
+    from: MAIL_FROM,
     to: recipientEmail,
     subject: 'NON DIMENTICARTI L EVENTO:',
     html: `
@@ -78,7 +96,7 @@ const sendNotifEmailActivity = (recipientEmail, activityDetails) => {
   });
 
   const mailOptions = {
-    from: '"Servizio sito SELFIE"<noreply@example.com>',
+    from: MAIL_FROM,
     to: recipientEmail,
     subject: 'NON DIMENTICARTI L ATTIVITÀ:',
     html: `
@@ -100,4 +118,3 @@ const sendNotifEmailActivity = (recipientEmail, activityDetails) => {
 
 
 module.exports = { sendReminderEmail, sendNotifEmail, sendNotifEmailActivity };
-
